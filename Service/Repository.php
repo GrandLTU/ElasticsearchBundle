@@ -84,6 +84,46 @@ class Repository
     }
 
     /**
+     * Returns FQNs of documents in repository.
+     *
+     * Can be filtered by providing array of desired repositories:
+     *
+     * Providing empty array will get all class names.
+     * Providing array will get class names of those repositories; result will be array of class names.
+     * Providing a single repository name will return class name of that repository`s document or null if not exists.
+     * Providing null will return first class name in repository.
+     *
+     * @param string[]|string|null $repositories
+     *
+     * @return string[]|string|null
+     */
+    public function getDocumentsClass($repositories = [])
+    {
+        $meta = $this->getManager()->getBundlesMapping($this->namespaces);
+
+        if ($repositories === null) {
+            return reset($meta)->getNamespace();
+        }
+        if (!is_array($repositories)) {
+            return isset($meta[$repositories]) ? $meta[$repositories]->getNamespace() : null;
+        }
+
+        $classes = [];
+
+        if (!empty($repositories)) {
+            foreach ($repositories as $name) {
+                $classes[$name] = isset($meta[$name]) ? $meta[$name]->getNamespace() : null;
+            }
+        } else {
+            foreach ($meta as $namespace => $metadata) {
+                $classes[$namespace] = $metadata->getNamespace();
+            }
+        }
+
+        return $classes;
+    }
+
+    /**
      * Returns a single document data by ID or null if document is not found.
      *
      * @param string $id         Document Id to find.
