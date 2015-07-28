@@ -12,6 +12,7 @@
 namespace ONGR\ElasticsearchBundle\Result;
 
 use ONGR\ElasticsearchBundle\Result\Aggregation\AggregationIterator;
+use ONGR\ElasticsearchBundle\Result\Suggestion\SuggestionIterator;
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 
 /**
@@ -48,6 +49,11 @@ class DocumentIterator extends AbstractConvertibleResultIterator implements \Cou
      * @var array
      */
     private $rawSuggestions;
+
+    /**
+     * @var SuggestionIterator
+     */
+    private $suggestions;
 
     /**
      * Constructor.
@@ -110,5 +116,24 @@ class DocumentIterator extends AbstractConvertibleResultIterator implements \Cou
         }
 
         return $this->aggregations;
+    }
+
+    /**
+     * Returns suggestions.
+     *
+     * @return SuggestionIterator
+     */
+    public function getSuggestions()
+    {
+        if (isset($this->rawSuggestions)) {
+            $this->suggestions = new SuggestionIterator($this->rawSuggestions);
+
+            // Clear memory.
+            unset($this->rawSuggestions);
+        } elseif ($this->suggestions === null) {
+            $this->suggestions = new SuggestionIterator([]);
+        }
+
+        return $this->suggestions;
     }
 }
